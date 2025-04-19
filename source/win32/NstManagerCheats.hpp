@@ -27,6 +27,8 @@
 
 #pragma once
 
+#include <windows.h>
+
 namespace Nestopia
 {
 	namespace Window
@@ -54,10 +56,15 @@ namespace Nestopia
 			void Load() const;
 			void Update() const;
 			void Flush() const;
+			static void CALLBACK OnTimer(HWND hwnd, UINT msg, UINT_PTR idEvent, DWORD dwTime);
+			void StartAutoReload();
+			void StopAutoReload();
 
 			const Paths& paths;
 			bool game;
+			bool autoReloadEnabled;
 			Object::Heap<Window::Cheats> dialog;
+			UINT_PTR timerId;
 		};
 	}
 }

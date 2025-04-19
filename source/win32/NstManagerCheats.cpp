@@ -39,12 +39,15 @@ namespace Nestopia
 		Manager ( e, m, this, &Cheats::OnEmuEvent, IDM_OPTIONS_CHEATS, &Cheats::OnCmdOptions ),
 		paths   ( p ),
 		game    ( false ),
-		dialog  ( new Window::Cheats(e,cfg,p) )
+		autoReloadEnabled ( false ),
+		dialog  ( new Window::Cheats(e,cfg,p) ),
+		timerId ( 0 )
 		{
 		}
 
 		Cheats::~Cheats()
 		{
+			StopAutoReload();
 		}
 
 		void Cheats::Save(Configuration& cfg) const
@@ -106,19 +109,20 @@ namespace Nestopia
 			switch (event)
 			{
 				case Emulator::EVENT_LOAD:
-
 					game = emulator.IsGame();
 					Load();
+					if (game) {
+						StartAutoReload();
+					}
 					break;
 
 				case Emulator::EVENT_UNLOAD:
-
+					StopAutoReload();
 					Flush();
 					game = false;
 					break;
 
 				case Emulator::EVENT_NETPLAY_MODE:
-
 					menu[IDM_OPTIONS_CHEATS].Enable( !data );
 					break;
 			}
@@ -128,6 +132,66 @@ namespace Nestopia
 		{
 			dialog->Open();
 			Update();
+		}
+
+		void CALLBACK Cheats::OnTimer(HWND hwnd, UINT msg, UINT_PTR idEvent, DWORD dwTime)
+		{
+			// Get instance pointer from window user data
+			Cheats* instance = (Cheats*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+			if (instance && instance->game && instance->autoReloadEnabled)
+			{
+				// Clear all existing cheat codes
+				instance->dialog->Flush();
+				Nes::Cheats(instance->emulator).ClearCodes();
+
+				// Load new cheat codes from mrcyclo.xml
+				const Path mrcycloPath("cheats/mrcyclo.xml");
+				if (instance->dialog->Load(mrcycloPath))
+				{
+					Io::Log() << "Cheats: auto-loaded cheats from \"" << mrcycloPath << "\"\r\n";
+				}
+				instance->Update();
+			}
+		}
+
+		void Cheats::StartAutoReload()
+		{
+			if (!autoReloadEnabled)
+			{
+				autoReloadEnabled = true;
+				// Get main window handle
+				HWND hwnd = GetActiveWindow();
+				if (hwnd)
+				{
+					// Store instance pointer in window user data
+					SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)this);
+					// Start timer
+					timerId = SetTimer(hwnd, 1, 100, OnTimer);
+					if (timerId)
+					{
+						Io::Log() << "Cheats: auto reload enabled\r\n";
+					}
+				}
+			}
+		}
+
+		void Cheats::StopAutoReload()
+		{
+			if (autoReloadEnabled)
+			{
+				autoReloadEnabled = false;
+				if (timerId)
+				{
+					HWND hwnd = GetActiveWindow();
+					if (hwnd)
+					{
+						KillTimer(hwnd, timerId);
+						SetWindowLongPtr(hwnd, GWLP_USERDATA, 0);
+					}
+					timerId = 0;
+					Io::Log() << "Cheats: auto reload disabled\r\n";
+				}
+			}
 		}
 	}
 }
