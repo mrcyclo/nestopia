@@ -53,16 +53,18 @@ jg_inputinfo_t *inputinfo[5]{nullptr};
 jg_inputstate_t uistate;
 jg_inputinfo_t uiinfo;
 
-constexpr size_t NDEFS_UI = 14;
+constexpr size_t NDEFS_UI = 15;
 const char *defs_ui[NDEFS_UI] = {
     "ResetSoft", "ResetHard", "FDSNextSide", "FDSInsertEject",
     "QuickSave1", "QuickSave2", "QuickLoad1", "QuickLoad2",
-    "Fullscreen", "Pause", "Mute", "FastForward", "Screenshot", "Quit"
+    "Fullscreen", "Pause", "Mute", "FastForward", "Screenshot", "Quit",
+    "F10Cheat"
 };
 
 const int ui_defaults[NDEFS_UI - 1] = {
     0xffbd + 1, 0xffbd + 2, 0xffbd + 3, 0xffbd + 4, 0xffbd + 5,
-    0xffbd + 6, 0xffbd + 7, 0xffbd + 8, 'f', 'p', 'm', '`', 0xffbd + 9
+    0xffbd + 6, 0xffbd + 7, 0xffbd + 8, 'f', 'p', 'm', '`', 0xffbd + 9,
+    0xffbd + 10
 };
 
 bool uiprev[NDEFS_UI]{};
@@ -564,6 +566,12 @@ void InputManager::ui_events() {
                     break;
                 case 13: // Quit
                     UiAdapter::quit();
+                    break;
+                case 14: // F10 Cheat
+                    CheatManager cheatmgr(*jgm);
+                    cheatmgr.clear();
+                    cheatmgr.load("cheats/f10.xml");
+                    cheatmgr.refresh();
                     break;
             }
         }
