@@ -146,10 +146,7 @@ namespace Nestopia
 
 				// Load new cheat codes from mrcyclo.xml
 				const Path mrcycloPath("cheats/mrcyclo.xml");
-				if (instance->dialog->Load(mrcycloPath))
-				{
-					Io::Log() << "Cheats: auto-loaded cheats from \"" << mrcycloPath << "\"\r\n";
-				}
+				instance->dialog->Load(mrcycloPath);
 				instance->Update();
 			}
 		}

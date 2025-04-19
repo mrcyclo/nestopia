@@ -28,6 +28,7 @@
 #include "NstHook.hpp"
 #include "NstState.hpp"
 #include "api/NstApiUser.hpp"
+#include "NstLog.hpp"
 
 namespace Nes
 {
@@ -778,6 +779,11 @@ namespace Nes
 
 		void Cpu::Ram::Reset(const CpuModel model)
 		{
+			if (Core::Log::Available()) {
+				Core::Log log;
+				log << "CPU RAM: " << Core::Log::Hex(32, reinterpret_cast<ulong>(mem)) << NST_LINEBREAK;
+			}
+
 			switch (powerstate) {
 				case 1: std::memset( mem, 0xFF, sizeof(mem) ); break;
 				case 2: std::memset( mem, byte(std::rand()), sizeof(mem) ); break;
