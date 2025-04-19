@@ -1,7 +1,6 @@
 *.so
 *.o
 *.dylib
-*.dll
 *.nes
 *.fds
 *.ips
@@ -11,7 +10,6 @@
 *.bc
 *~
 .npmignore
-source/core/database/
 
 # Autotools cruft
 Makefile
@@ -38,3 +36,10 @@ source/core/vssystem/.deps/
 source/core/vssystem/.dirstamp
 source/fltkui/.deps/
 source/fltkui/.dirstamp
+projects/debug
+projects/debugout
+projects/release
+projects/releaseout
+.vs/
+lib/emucore.lib
+lib/emucoredebug.lib
